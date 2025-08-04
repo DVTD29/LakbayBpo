@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fare Rates - Transport System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --main-bg: #f4f7fc;
+      --outer-container-bg: #fff;
+      --sidebar-bg: #253a77;
+      --sidebar-text: #fff;
+      --sidebar-radius: 22px;
+      --container-radius: 32px;
+      --accent: #4670e8;
+    }
+    html, body { height: 100%; margin: 0; padding: 0; background: var(--main-bg); font-family: 'Segoe UI', Arial, sans-serif; }
+    .outer-container {
+      min-height: 97vh; max-width: 97vw; margin: 18px auto 18px auto; background: var(--outer-container-bg);
+      border-radius: var(--container-radius); box-shadow: 0 8px 50px rgba(60,60,110,0.09), 0 1.5px 8px rgba(120,120,170,0.08);
+      display: grid; grid-template-columns: 230px 1fr; padding: 0; position: relative; overflow: hidden;
+    }
+    .sidebar {
+      background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; padding: 32px 0 24px 0;
+      border-radius: var(--sidebar-radius) 0 0 var(--sidebar-radius); margin: 18px 0 18px 18px; min-height: calc(100vh - 36px);
+      width: 210px; box-shadow: 0 0 28px rgba(60,60,110,0.06);
+    }
+    .sidebar .logo { font-size: 1.35rem; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 36px; text-align: center; }
+    .sidebar nav { flex: 1; }
+    .sidebar nav a {
+      display: flex; align-items: center; color: #e2e8f0; text-decoration: none; font-size: 1.06rem;
+      padding: 13px 24px; border-left: 4px solid transparent; transition: background .15s, border .2s, color .2s;
+      margin-bottom: 7px; border-radius: 10px; gap: 10px;
+    }
+    .sidebar nav a.active, .sidebar nav a:hover { background: rgba(255,255,255,0.08); color: #fff; border-left: 4px solid var(--accent);}
+    .sidebar nav a .icon { font-size: 1.18rem; width: 24px; text-align: center; }
+    .sidebar .sidebar-actions {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar .sidebar-btn {
+      width: 100%;
+      margin: 7px 0 0 0;
+      background: none;
+      color: #e2e8f0;
+      border: none;
+      font-size: 1.06rem;
+      opacity: .85;
+      padding: 13px 24px;
+      text-align: left;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .13s, color .13s, opacity .2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar .sidebar-btn:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .sidebar .sidebar-btn.logout {
+      color: #ffb7b7;
+    }
+    .main-content-area { display: flex; flex-direction: column; min-height: 100vh; padding: 0 32px 32px 12px; background: transparent;}
+    .topbar {
+      height: 58px; margin: 32px 0 22px 0; background: #fff; border-radius: 16px; box-shadow: 0 2px 8px rgba(80,100,180,0.07);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
+    }
+    .topbar .greet { font-size: 1.11rem; color: #333; font-weight: 500;}
+    .topbar .profile {
+      display: flex; align-items: center; gap: 0; cursor: pointer; text-decoration: none;
+    }
+    .topbar .profile .circle {
+      background: #253a77; color: #fff; font-weight: bold; width: 38px; height: 38px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.08rem; overflow: hidden; object-fit: cover;
+    }
+    .main { margin-top: 8px;}
+    .fare-section {
+      background: #fff; border-radius: 18px; box-shadow: 0 4px 18px rgba(60,60,110,0.07);
+      padding: 36px 28px 28px 28px; margin: 24px 0 0 0; max-width: 900px; min-width: 320px; width: 100%;
+    }
+    .fare-title { color: #253a77; font-size: 1.32rem; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.5px;}
+    .fare-desc { color: #555; font-size: 1.01rem; margin-bottom: 22px;}
+    .fare-table { width: 100%; border-collapse: collapse; margin-bottom: 28px;}
+    .fare-table th, .fare-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      text-align: left;
+    }
+    .fare-table th { background: #f7fafd; color: #4670e8; font-weight: 600; }
+    .fare-table tr:last-child td { border-bottom: none; }
+    .fare-table tr:nth-child(even) td { background: #f9fbfd; }
+    .fare-section h3 { color: #2644a7; margin-top: 2rem; margin-bottom: 0.5rem; }
+    .provider-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 18px;}
+    .provider-table th, .provider-table td {
+      border: 1px solid #dde8ff;
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 1rem;
+    }
+    .provider-table th { background: #f7fbff; color: #253a77; font-weight: 600;}
+    @media (max-width: 1200px) { .outer-container { max-width: 99vw; }}
+    @media (max-width: 900px) {
+      .outer-container { grid-template-columns: 60px 1fr; padding: 0;}
+      .sidebar { padding: 18px 0 10px 0; margin: 9px 0 9px 9px; min-width: 60px;}
+      .sidebar .logo { font-size: 0.97rem; }
+      .main-content-area { padding: 0 4vw 12px 1vw;}
+      .topbar { margin: 11px 0 12px 0; padding: 0 8px;}
+      .main { margin-top: 0;}
+      .fare-section { padding: 18px 8px 18px 8px;}
+    }
+    .profile-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; display: block;}
+    /* Feedback Modal */
+    .modal-backdrop {
+      position: fixed;
+      z-index: 9999;
+      inset: 0;
+      background: rgba(30,40,60,0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: #fff;
+      color: #222;
+      border-radius: 1rem;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 6px 24px rgba(10,15,35,0.12);
+      min-width: 330px;
+      max-width: 95vw;
+    }
+    .modal h2 {
+      margin-top: 0;
+      font-size: 1.18rem;
+      color: #253a77;
+    }
+    .modal textarea {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.8rem;
+      border: 1px solid #c2cbe0;
+      resize: vertical;
+      font-size: 1rem;
+      background: #f8fafb;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+    .modal-actions button {
+      background: #253a77;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 0.7rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .modal-actions button[type="button"] {
+      background: #e2e8f0;
+      color: #233a5c;
+    }
+    .modal-actions button[type="button"]:hover {
+      background: #d3e0ff;
+    }
+    .modal-actions button[type="submit"]:hover {
+      background: #4066c8;
+    }
+  </style>
+</head>
+<body>
+<script>
+  const loggedInUser = localStorage.getItem('loggedInUser');
+  if (!loggedInUser) { window.location.href = "login.html"; }
+</script>
+<div class="outer-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">🚌 <span style="font-weight:600;">LakbayBPO</span></div>
+    <nav>
+      <a href="dashboard.html"><span class="icon">🏠</span>Dashboard</a>
+      <a href="plan.html"><span class="icon">🗺️</span>Plan Route</a>
+      <a href="fare.html" class="active"><span class="icon">💸</span>Fare Rates</a>
+      <a href="triphistory.html"><span class="icon">📋</span>Trip History</a>
+      <a href="analytics.html"><span class="icon">📊</span>Analytics</a>
+    </nav>
+    <div class="sidebar-actions">
+      <button class="sidebar-btn" onclick="openFeedback()">
+        <span class="icon">💬</span>Feedback
+      </button>
+      <button class="sidebar-btn logout" onclick="logoutUser(); return false;">
+        ⏏ Logout
+      </button>
+    </div>
+  </aside>
+  <!-- Main Content Area -->
+  <div class="main-content-area">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <span class="greet" id="greetMsg">Good day!</span>
+      <a href="profile.html" class="profile">
+        <span id="profileCircle" class="circle"></span>
+      </a>
+    </div>
+    <main class="main">
+      <div class="fare-section">
+        <div class="fare-title">Fare Rates</div>
+        <div class="fare-desc">Check updated fare rates for EDSA Bus Carousel, LRT-1, MRT-3, LRT-2, and Motorcycle Taxi (Angkas, JoyRide, Move It).</div>
+        <h3>EDSA Bus Carousel Fare Matrix</h3>
+        <div id="edsaFareTable"></div>
+        <h3>LRT-1 & LRT-2 Fare Guide</h3>
+        <table class="fare-table">
+          <thead>
+            <tr><th>Distance/Stations</th><th>Fare</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1-3 stations</td><td>₱15</td></tr>
+            <tr><td>4-7 stations</td><td>₱20</td></tr>
+            <tr><td>8+ stations</td><td>₱30</td></tr>
+            <tr><td>Same station (e.g., end-to-end roundtrip)</td><td>₱13</td></tr>
+          </tbody>
+        </table>
+        <h3>MRT-3 Fare Guide</h3>
+        <table class="fare-table">
+          <thead>
+            <tr><th>Distance/Stations</th><th>Fare</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1-3 stations</td><td>₱15</td></tr>
+            <tr><td>4-7 stations</td><td>₱20</td></tr>
+            <tr><td>8+ stations</td><td>₱30</td></tr>
+            <tr><td>Same station</td><td>₱13</td></tr>
+          </tbody>
+        </table>
+        <h3>Motorcycle Taxi (MC Taxi) Fare Table</h3>
+        <table class="provider-table">
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Base Fare</th>
+              <th>Base Km</th>
+              <th>Per KM After Base</th>
+              <th>Sample: 8 km</th>
+              <th>Sample: 15 km</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Angkas</td>
+              <td>₱50</td>
+              <td>2 km</td>
+              <td>₱10/km</td>
+              <td>₱110</td>
+              <td>₱180</td>
+            </tr>
+            <tr>
+              <td>JoyRide</td>
+              <td>₱49</td>
+              <td>2 km</td>
+              <td>₱9/km</td>
+              <td>₱103</td>
+              <td>₱162</td>
+            </tr>
+            <tr>
+              <td>Move It</td>
+              <td>₱48</td>
+              <td>2 km</td>
+              <td>₱11/km</td>
+              <td>₱116</td>
+              <td>₱187</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <!-- Feedback Modal -->
+  <div class="modal-backdrop" id="feedbackModal" style="display:none;">
+    <div class="modal">
+      <h2>Send Feedback</h2>
+      <form onsubmit="submitFeedback(event)">
+        <textarea required placeholder="Type your feedback here..." rows="5"></textarea>
+        <div class="modal-actions">
+          <button type="button" onclick="closeFeedback()">Cancel</button>
+          <button type="submit">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  // ==== EDSA Bus Carousel Fare Data ====
+  const edsaStations = [
+    "Monumento","Bagong Barrio","Balintawak","Kaingin Road","NLEx Harbor Link","LRT-1 Roosevelt","Muñoz",
+    "North Avenue","Quezon Avenue","Nepal Q-Mart","Main Avenue","Santolan","Ortigas","Guadalupe","Ayala","Taft","PITX"
+  ];
+  const edsaFares = {
+    "Monumento":   {"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":17,"North Avenue":21,"Quezon Avenue":25,"Nepal Q-Mart":30,"Main Avenue":33,"Santolan":36,"Ortigas":41,"Guadalupe":46,"Ayala":54,"Taft":64,"PITX":76},
+    "Bagong Barrio":{"Monumento":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":20,"Nepal Q-Mart":24,"Main Avenue":28,"Santolan":32,"Ortigas":36,"Guadalupe":41,"Ayala":50,"Taft":60,"PITX":72},
+    "Balintawak":  {"Monumento":15,"Bagong Barrio":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":17,"Main Avenue":20,"Santolan":23,"Ortigas":32,"Guadalupe":37,"Ayala":46,"Taft":56,"PITX":68},
+    "Kaingin Road":{"Monumento":15,"Bagong Barrio":15,"Balintawak":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":17,"Santolan":20,"Ortigas":30,"Guadalupe":35,"Ayala":43,"Taft":54,"PITX":66},
+    "NLEx Harbor Link":{"Monumento":15,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":17,"Ortigas":27,"Guadalupe":32,"Ayala":41,"Taft":52,"PITX":64},
+    "LRT-1 Roosevelt":{"Monumento":15,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":22,"Guadalupe":29,"Ayala":38,"Taft":48,"PITX":60},
+    "Muñoz":      {"Monumento":17,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":20,"Guadalupe":25,"Ayala":34,"Taft":44,"PITX":56},
+    "North Avenue":{"Monumento":21,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":18,"Ayala":25,"Taft":38,"PITX":49},
+    "Quezon Avenue":{"Monumento":25,"Bagong Barrio":20,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Ayala":19,"Taft":30,"PITX":43},
+    "Nepal Q-Mart":{"Monumento":30,"Bagong Barrio":24,"Balintawak":17,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Ayala":15,"Taft":25,"PITX":38},
+    "Main Avenue":{"Monumento":33,"Bagong Barrio":28,"Balintawak":20,"Kaingin Road":17,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Ayala":15,"Taft":22,"PITX":35},
+    "Santolan":   {"Monumento":36,"Bagong Barrio":32,"Balintawak":23,"Kaingin Road":20,"NLEx Harbor Link":17,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Ortigas":15,"Guadalupe":15,"Ayala":15,"Taft":20,"PITX":32},
+    "Ortigas":    {"Monumento":41,"Bagong Barrio":36,"Balintawak":32,"Kaingin Road":30,"NLEx Harbor Link":27,"LRT-1 Roosevelt":22,"Muñoz":20,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Guadalupe":15,"Ayala":15,"Taft":15,"PITX":26},
+    "Guadalupe":  {"Monumento":46,"Bagong Barrio":41,"Balintawak":37,"Kaingin Road":35,"NLEx Harbor Link":32,"LRT-1 Roosevelt":29,"Muñoz":25,"North Avenue":18,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Ayala":15,"Taft":15,"PITX":20},
+    "Ayala":      {"Monumento":54,"Bagong Barrio":50,"Balintawak":46,"Kaingin Road":43,"NLEx Harbor Link":41,"LRT-1 Roosevelt":38,"Muñoz":34,"North Avenue":25,"Quezon Avenue":19,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Taft":15,"PITX":15},
+    "Taft":       {"Monumento":64,"Bagong Barrio":60,"Balintawak":56,"Kaingin Road":54,"NLEx Harbor Link":52,"LRT-1 Roosevelt":48,"Muñoz":44,"North Avenue":38,"Quezon Avenue":30,"Nepal Q-Mart":25,"Main Avenue":22,"Santolan":20,"Ortigas":15,"Guadalupe":15,"Ayala":15,"PITX":15},
+    "PITX":       {"Monumento":76,"Bagong Barrio":72,"Balintawak":68,"Kaingin Road":66,"NLEx Harbor Link":64,"LRT-1 Roosevelt":60,"Muñoz":56,"North Avenue":49,"Quezon Avenue":43,"Nepal Q-Mart":38,"Main Avenue":35,"Santolan":32,"Ortigas":26,"Guadalupe":20,"Ayala":15,"Taft":15}
+  };
+
+  // Topbar greeting and profile
+  if (loggedInUser) {
+    function setProfileCircle() {
+      let photo = localStorage.getItem('profilePhoto_' + loggedInUser);
+      const circle = document.getElementById('profileCircle');
+      if (photo) {
+        circle.innerHTML = `<img src="${photo}" alt="Profile" class="profile-img" />`;
+      } else {
+        let initials = loggedInUser.length === 1
+          ? loggedInUser[0].toUpperCase()
+          : (loggedInUser[0] + loggedInUser.slice(-1)).toUpperCase();
+        circle.textContent = initials;
+        circle.style.background = "#253a77";
+        circle.style.color = "#fff";
+      }
+    }
+    setProfileCircle();
+    document.getElementById('greetMsg').textContent = `Good day!`;
+  }
+  function logoutUser() { localStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; }
+
+  // Render EDSA Fare Table
+  function renderEdsaFareTable() {
+    let tableHtml = '<table class="fare-table"><thead><tr><th>From \\ To</th>';
+    edsaStations.forEach(st => { tableHtml += `<th>${st}</th>`; });
+    tableHtml += '</tr></thead><tbody>';
+    edsaStations.forEach(from => {
+      tableHtml += `<tr><th>${from}</th>`;
+      edsaStations.forEach(to => {
+        let fare = edsaFares[from] && edsaFares[from][to] ? '₱' + edsaFares[from][to] : '-';
+        if (from === to) fare = '—';
+        tableHtml += `<td>${fare}</td>`;
+      });
+      tableHtml += '</tr>';
+    });
+    tableHtml += '</tbody></table>';
+    document.getElementById('edsaFareTable').innerHTML = tableHtml;
+  }
+  renderEdsaFareTable();
+
+  // Feedback Modal logic
+  function openFeedback() {
+    document.getElementById('feedbackModal').style.display = 'flex';
+  }
+  function closeFeedback() {
+    document.getElementById('feedbackModal').style.display = 'none';
+  }
+  function submitFeedback(e) {
+    e.preventDefault();
+    alert("Thank you for your feedback!");
+    closeFeedback();
+  }
+</script>
+</body>
+</html>

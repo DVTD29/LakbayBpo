@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forgot Password - Transport Fare System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #e9effd 0%, #d6e6fb 50%, #f5f9ff 100%);
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .forgot-box {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      text-align: center;
+    }
+    .forgot-box img {
+      width: 100px;
+      margin-bottom: 15px;
+    }
+    .forgot-box h1 {
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+      color: #333333;
+    }
+    .forgot-box p {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .forgot-box input[type="email"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      color: #333;
+    }
+    .forgot-box input::placeholder {
+      color: #999;
+    }
+    .forgot-box button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    .forgot-box button:hover {
+      background-color: #0056b3;
+    }
+    .options {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    .options a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .options a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="forgot-box">
+    
+    <h1>Forgot Password?</h1>
+    <p>Enter your email address and we’ll send you instructions to reset your password.</p>
+    <form>
+      <input type="email" placeholder="Enter your email" required />
+      <button type="submit">Send Reset Link</button>
+    </form>
+    <div class="options">
+      <p><a href="login.html">Back to Sign in</a></p>
+    </div>
+  </div>
+</body>
+</html>

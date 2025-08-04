@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plan Route - Transport System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --main-bg: #f4f7fc;
+      --outer-container-bg: #fff;
+      --sidebar-bg: #253a77;
+      --sidebar-text: #fff;
+      --sidebar-radius: 22px;
+      --container-radius: 32px;
+      --accent: #4670e8;
+    }
+    html, body { height: 100%; margin: 0; padding: 0; background: var(--main-bg); font-family: 'Segoe UI', Arial, sans-serif; }
+    .outer-container {
+      min-height: 97vh; max-width: 97vw; margin: 18px auto 18px auto; background: var(--outer-container-bg);
+      border-radius: var(--container-radius); box-shadow: 0 8px 50px rgba(60,60,110,0.09), 0 1.5px 8px rgba(120,120,170,0.08);
+      display: grid; grid-template-columns: 230px 1fr; padding: 0; position: relative; overflow: hidden;
+    }
+    .sidebar {
+      background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; padding: 32px 0 24px 0;
+      border-radius: var(--sidebar-radius) 0 0 var(--sidebar-radius); margin: 18px 0 18px 18px; min-height: calc(100vh - 36px);
+      width: 210px; box-shadow: 0 0 28px rgba(60,60,110,0.06);
+    }
+    .sidebar .logo { font-size: 1.35rem; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 36px; text-align: center; }
+    .sidebar nav { flex: 1; }
+    .sidebar nav a {
+      display: flex; align-items: center; color: #e2e8f0; text-decoration: none; font-size: 1.06rem;
+      padding: 13px 24px; border-left: 4px solid transparent; transition: background .15s, border .2s, color .2s;
+      margin-bottom: 7px; border-radius: 10px; gap: 10px;
+    }
+    .sidebar nav a.active, .sidebar nav a:hover { background: rgba(255,255,255,0.08); color: #fff; border-left: 4px solid var(--accent);}
+    .sidebar nav a .icon { font-size: 1.18rem; width: 24px; text-align: center; }
+    .sidebar .sidebar-actions {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar .sidebar-btn {
+      width: 100%;
+      margin: 7px 0 0 0;
+      background: none;
+      color: #e2e8f0;
+      border: none;
+      font-size: 1.06rem;
+      opacity: .85;
+      padding: 13px 24px;
+      text-align: left;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .13s, color .13s, opacity .2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar .sidebar-btn:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .sidebar .sidebar-btn.logout {
+      color: #ffb7b7;
+    }
+    .main-content-area {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 0 32px 32px 12px;
+      background: transparent;
+    }
+    .topbar {
+      height: 58px; margin: 32px 0 22px 0; background: #fff; border-radius: 16px; box-shadow: 0 2px 8px rgba(80,100,180,0.07);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
+    }
+    .topbar .greet { font-size: 1.11rem; color: #333; font-weight: 500;}
+    .topbar .profile {
+      display: flex; align-items: center; gap: 0; cursor: pointer; text-decoration: none;
+    }
+    .topbar .profile .circle {
+      background: #253a77; color: #fff; font-weight: bold; width: 38px; height: 38px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.08rem; overflow: hidden; object-fit: cover;
+    }
+    .main {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 80vh;
+    }
+    .plan-container {
+      background: #fff; border-radius: 18px; box-shadow: 0 4px 18px rgba(60,60,110,0.07);
+      padding: 36px 28px 28px 28px;
+      margin: 36px auto 0 auto;
+      max-width: 550px;
+      min-width: 320px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .plan-title { color: #253a77; font-size: 1.32rem; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.5px; text-align: center;}
+    .plan-desc { color: #555; font-size: 1.01rem; margin-bottom: 22px; text-align: center;}
+    .plan-form label { font-size: 1rem; color: #333; font-weight: 500; margin-bottom: 8px; display: block;}
+    .plan-form input, .plan-form select {
+      width: 100%; padding: 11px 12px; border-radius: 6px; border: 1px solid #d4d9e4;
+      background: #f4f7fa; font-size: 1rem; margin-bottom: 18px;
+    }
+    .plan-form .custom-row { display: flex; gap: 10px; margin-bottom: 8px; }
+    .plan-form .custom-row input, .plan-form .custom-row select { margin-bottom: 0; flex: 1;}
+    .plan-form .section-label { margin-top: 16px; margin-bottom: 4px; font-size: 1.04rem; font-weight: bold; color: #2644a7; letter-spacing: 0.1px;}
+    .plan-form button {
+      background: #4670e8; color: #fff; border: none; border-radius: 6px; padding: 12px 0; width: 100%;
+      font-size: 1.12rem; font-weight: 600; cursor: pointer; transition: background .18s;
+    }
+    .plan-form button:hover { background: #2644a7;}
+    .plan-results { margin-top: 22px; background: #e9effd; padding: 17px; border-radius: 8px; color: #253a77; width: 100%;}
+    #saveTripBtn { background: #007bff; color: #fff; border: none; border-radius: 5px; padding: 10px 18px; font-size: 1rem; font-weight: 500; margin-top: 10px; cursor: pointer; transition: background .18s;}
+    #saveTripBtn:hover { background: #0056b3;}
+    .segment-label { font-weight: 600; color: #2644a7;}
+    .summary-row { margin-bottom: 7px;}
+    .total-fare { font-weight: bold; font-size: 1.1rem; color: #197a39; margin-top: 12px;}
+    .total-time { font-size: 1rem; color: #222; margin-bottom: 8px;}
+    .taxi-table { width: 100%; border-collapse: collapse; margin: 6px 0 10px 0;}
+    .taxi-table th, .taxi-table td { border: 1px solid #dde8ff; padding: 7px 10px; text-align: left; font-size: 0.97rem;}
+    .taxi-table th { background: #f7fbff; color: #253a77; font-weight: 600;}
+    @media (max-width: 1200px) { .outer-container { max-width: 99vw; }}
+    @media (max-width: 900px) {
+      .outer-container { grid-template-columns: 60px 1fr; padding: 0;}
+      .sidebar { padding: 18px 0 10px 0; margin: 9px 0 9px 9px; min-width: 60px;}
+      .sidebar .logo { font-size: 0.97rem; }
+      .main-content-area { padding: 0 4vw 12px 1vw;}
+      .topbar { margin: 11px 0 12px 0; padding: 0 8px;}
+      .main { margin-top: 0;}
+      .plan-container {padding: 20px 4vw;}
+    }
+    .profile-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; display: block;}
+    .transfer-row { background: #f6faff; padding: 12px 10px; border-radius: 7px; margin-bottom: 10px; border: 1px dashed #aac6f7;}
+    /* Feedback modal styles */
+    #feedbackModal {
+      position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(39,51,70,0.12);
+      z-index: 99; display: none; align-items: center; justify-content: center;
+    }
+    #feedbackModal .modal {
+      background: #fff; border-radius: 15px; padding: 32px 30px 22px 30px; box-shadow: 0 6px 44px rgba(39,51,70,0.14);
+      min-width: 320px; max-width: 95vw; width: 360px; display: flex; flex-direction: column; align-items: stretch;
+    }
+    #feedbackModal h2 { font-size: 1.18rem; margin-bottom: 13px; color: #253a77; text-align: center;}
+    #feedbackModal textarea {
+      border-radius: 8px; border: 1px solid #aac6f7; padding: 12px; font-size: 1rem; resize: vertical; margin-bottom: 16px; min-height: 78px;
+    }
+    #feedbackModal .modal-actions {
+      display: flex; justify-content: flex-end; gap: 14px;
+    }
+    #feedbackModal .modal-actions button {
+      background: #4670e8; color: #fff; border: none; border-radius: 7px; padding: 8px 17px; font-size: 1rem; cursor: pointer; font-weight: 500;
+      transition: background .14s;
+    }
+    #feedbackModal .modal-actions button[type="button"] { background: #a5a9b7; }
+    #feedbackModal .modal-actions button:hover { background: #2644a7;}
+  </style>
+</head>
+<body>
+<script>
+  const loggedInUser = localStorage.getItem('loggedInUser');
+  if (!loggedInUser) { window.location.href = "login.html"; }
+</script>
+<div class="outer-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">🚌 <span style="font-weight:600;">LakbayBPO</span></div>
+    <nav>
+      <a href="dashboard.html"><span class="icon">🏠</span>Dashboard</a>
+      <a href="plan.html" class="active"><span class="icon">🗺️</span>Plan Route</a>
+      <a href="fare.html"><span class="icon">💸</span>Fare Rates</a>
+      <a href="triphistory.html"><span class="icon">📋</span>Trip History</a>
+      <a href="analytics.html"><span class="icon">📊</span>Analytics</a>
+    </nav>
+    <div class="sidebar-actions">
+      <button class="sidebar-btn" onclick="openFeedback()">
+        <span class="icon">💬</span>Feedback
+      </button>
+      <button class="sidebar-btn logout" onclick="logoutUser(); return false;">
+        ⏏ Logout
+      </button>
+    </div>
+  </aside>
+  <!-- Main Content Area -->
+  <div class="main-content-area">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <span class="greet" id="greetMsg">Good day!</span>
+      <a href="profile.html" class="profile">
+        <span id="profileCircle" class="circle"></span>
+      </a>
+    </div>
+    <main class="main">
+      <div class="plan-container">
+        <div class="plan-title">Plan Your Route</div>
+        <div class="plan-desc">Customize your daily route and get fare estimates for every segment of your commute.<br>Combine first/last mile rides, EDSA, LRT/MRT, or MC Taxi!</div>
+        <form class="plan-form" id="planForm" onsubmit="return false;" style="width:100%;max-width:400px;">
+
+
+      <label for="shift" style="color: #0056b3; font-weight: bold;">Select Work Shift:</label>
+   <select id="shift">
+  <option value="shift1">6:00 AM – 3:00 PM</option>
+  <option value="shift2">11:00 AM – 8:00 PM</option>
+  <option value="shift3">2:00 PM – 11:00 PM</option>
+  <option value="shift4">7:00 PM – 4:00 AM</option>
+  <option value="shift5">11:00 PM – 8:00 AM</option>
+    </select>
+          <!-- First Mile -->
+          <div class="section-label">First Mile Ride (optional)</div>
+          <div class="custom-row">
+            <select id="firstVehicle">
+              <option value="">Vehicle</option>
+              <option value="Tricycle">Tricycle</option>
+              <option value="Jeepney">Jeepney</option>
+              <option value="Pedicab">Pedicab</option>
+              <option value="Taxi">Taxi</option>
+              <option value="Other">Other</option>
+            </select>
+            <input type="number" id="firstFare" placeholder="Fare (₱)" min="0" step="1">
+            <input type="number" id="firstTime" placeholder="Time (min)" min="0" step="1">
+          </div>
+          <!-- Main Transport -->
+          <div class="section-label" style="margin-top:12px;">Main Transport</div>
+          <select id="mainMode" onchange="renderMainMode()" required>
+            <option value="">Select main mode</option>
+            <option value="edsa">EDSA Bus Carousel</option>
+            <option value="lrtmrt">LRT/MRT Combo</option>
+            <option value="mctaxi">MC Taxi</option>
+          </select>
+          <div id="mainModeFields"></div>
+          <!-- Last Mile -->
+          <div class="section-label" style="margin-top:18px;">Last Mile Ride (optional)</div>
+          <div class="custom-row">
+            <select id="lastVehicle">
+              <option value="">Vehicle</option>
+              <option value="Tricycle">Tricycle</option>
+              <option value="Jeepney">Jeepney</option>
+              <option value="Pedicab">Pedicab</option>
+              <option value="Taxi">Taxi</option>
+              <option value="Other">Other</option>
+            </select>
+            <input type="number" id="lastFare" placeholder="Fare (₱)" min="0" step="1">
+            <input type="number" id="lastTime" placeholder="Time (min)" min="0" step="1">
+          </div>
+          <!-- Trip Note -->
+          <label for="tripNote">Trip Note (optional)</label>
+          <input type="text" id="tripNote" maxlength="50" placeholder="E.g. Rush hour, Rainy day">
+          <button onclick="showResults()">Calculate</button>
+        </form>
+        <div class="plan-results" id="planResults" style="display:none;">
+          <div id="resultsContent"></div>
+          <button id="saveTripBtn" style="margin-top:12px;display:none;">Save Trip</button>
+          <div id="tripSavedMsg" style="color:#009950;font-size:0.98rem;margin-top:8px;display:none;">Trip saved!</div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- Feedback Modal -->
+  <div class="modal-backdrop" id="feedbackModal" style="display:none;">
+    <div class="modal">
+      <h2>Send Feedback</h2>
+      <form onsubmit="submitFeedback(event)">
+        <textarea required placeholder="Type your feedback here..." rows="5"></textarea>
+        <div class="modal-actions">
+          <button type="button" onclick="closeFeedback()">Cancel</button>
+          <button type="submit">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+// ======= FARE DATA & FUNCTIONS =======
+
+// LRT-1, LRT-2, MRT-3 stations
+const lrt1Stations = [
+  "Roosevelt","Balintawak","Monumento","5th Avenue","R. Papa","Abad Santos","Blumentritt","Tayuman","Bambang","Doroteo Jose","Carriedo","Central Terminal","United Nations","Pedro Gil","Quirino","Vito Cruz","Gil Puyat","Libertad","EDSA","Baclaran"
+];
+const lrt2Stations = [
+  "Recto","Legarda","Pureza","V. Mapa","J. Ruiz","Gilmore","Betty Go Belmonte","Araneta Center-Cubao","Anonas","Katipunan","Santolan"
+];
+const mrtStations = [
+  "North Avenue","Quezon Avenue","Kamuning","Cubao","Santolan","Ortigas","Shaw","Boni","Guadalupe","Buendia","Ayala","Magallanes","Taft"
+];
+
+// EDSA Bus Carousel official stations and fares (matrix, 2024)
+const edsaFares = {
+  "Monumento":   {"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":17,"North Avenue":21,"Quezon Avenue":25,"Nepal Q-Mart":30,"Main Avenue":33,"Santolan":36,"Ortigas":41,"Guadalupe":46,"Ayala":54,"Taft":64,"PITX":76},
+  "Bagong Barrio":{"Monumento":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":20,"Nepal Q-Mart":24,"Main Avenue":28,"Santolan":32,"Ortigas":36,"Guadalupe":41,"Ayala":50,"Taft":60,"PITX":72},
+  "Balintawak":  {"Monumento":15,"Bagong Barrio":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":17,"Main Avenue":20,"Santolan":23,"Ortigas":32,"Guadalupe":37,"Ayala":46,"Taft":56,"PITX":68},
+  "Kaingin Road":{"Monumento":15,"Bagong Barrio":15,"Balintawak":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":17,"Santolan":20,"Ortigas":30,"Guadalupe":35,"Ayala":43,"Taft":54,"PITX":66},
+  "NLEx Harbor Link":{"Monumento":15,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":17,"Ortigas":27,"Guadalupe":32,"Ayala":41,"Taft":52,"PITX":64},
+  "LRT-1 Roosevelt":{"Monumento":15,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":22,"Guadalupe":29,"Ayala":38,"Taft":48,"PITX":60},
+  "Muñoz":      {"Monumento":17,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":20,"Guadalupe":25,"Ayala":34,"Taft":44,"PITX":56},
+  "North Avenue":{"Monumento":21,"Bagong Barrio":15,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":18,"Ayala":25,"Taft":38,"PITX":49},
+  "Quezon Avenue":{"Monumento":25,"Bagong Barrio":20,"Balintawak":15,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Ayala":19,"Taft":30,"PITX":43},
+  "Nepal Q-Mart":{"Monumento":30,"Bagong Barrio":24,"Balintawak":17,"Kaingin Road":15,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Ayala":15,"Taft":25,"PITX":38},
+  "Main Avenue":{"Monumento":33,"Bagong Barrio":28,"Balintawak":20,"Kaingin Road":17,"NLEx Harbor Link":15,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Ayala":15,"Taft":22,"PITX":35},
+  "Santolan":   {"Monumento":36,"Bagong Barrio":32,"Balintawak":23,"Kaingin Road":20,"NLEx Harbor Link":17,"LRT-1 Roosevelt":15,"Muñoz":15,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Ortigas":15,"Guadalupe":15,"Ayala":15,"Taft":20,"PITX":32},
+  "Ortigas":    {"Monumento":41,"Bagong Barrio":36,"Balintawak":32,"Kaingin Road":30,"NLEx Harbor Link":27,"LRT-1 Roosevelt":22,"Muñoz":20,"North Avenue":15,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Guadalupe":15,"Ayala":15,"Taft":15,"PITX":26},
+  "Guadalupe":  {"Monumento":46,"Bagong Barrio":41,"Balintawak":37,"Kaingin Road":35,"NLEx Harbor Link":32,"LRT-1 Roosevelt":29,"Muñoz":25,"North Avenue":18,"Quezon Avenue":15,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Ayala":15,"Taft":15,"PITX":20},
+  "Ayala":      {"Monumento":54,"Bagong Barrio":50,"Balintawak":46,"Kaingin Road":43,"NLEx Harbor Link":41,"LRT-1 Roosevelt":38,"Muñoz":34,"North Avenue":25,"Quezon Avenue":19,"Nepal Q-Mart":15,"Main Avenue":15,"Santolan":15,"Ortigas":15,"Guadalupe":15,"Taft":15,"PITX":15},
+  "Taft":       {"Monumento":64,"Bagong Barrio":60,"Balintawak":56,"Kaingin Road":54,"NLEx Harbor Link":52,"LRT-1 Roosevelt":48,"Muñoz":44,"North Avenue":38,"Quezon Avenue":30,"Nepal Q-Mart":25,"Main Avenue":22,"Santolan":20,"Ortigas":15,"Guadalupe":15,"Ayala":15,"PITX":15},
+  "PITX":       {"Monumento":76,"Bagong Barrio":72,"Balintawak":68,"Kaingin Road":66,"NLEx Harbor Link":64,"LRT-1 Roosevelt":60,"Muñoz":56,"North Avenue":49,"Quezon Avenue":43,"Nepal Q-Mart":38,"Main Avenue":35,"Santolan":32,"Ortigas":26,"Guadalupe":20,"Ayala":15,"Taft":15}
+};
+// LRT/MRT fare logic (simplified)
+function getRailFare(line, startIdx, endIdx) {
+  let stations = { "lrt1": lrt1Stations, "lrt2": lrt2Stations, "mrt": mrtStations }[line];
+  let stops = Math.abs(endIdx - startIdx);
+  if (stops === 0) return 13;
+  if (stops <= 3) return 15;
+  if (stops <= 7) return 20;
+  if (stops > 7) return 30;
+  return 15;
+}
+// MC Taxi providers fare rules
+function getMcTaxiFare(app, dist) {
+  dist = Number(dist) || 0;
+  let base = 50, addPerKm = 10, baseKm = 2;
+  if (app === "Angkas") { base = 50; addPerKm = 10; baseKm = 2; }
+  if (app === "Move It") { base = 48; addPerKm = 11; baseKm = 2; }
+  if (app === "JoyRide") { base = 49; addPerKm = 9; baseKm = 2; }
+  let extra = 0;
+  if (dist > baseKm) extra = Math.ceil(dist - baseKm) * addPerKm;
+  return base + extra;
+}
+
+// ====== TOPBAR GREETING & PROFILE ======
+if (loggedInUser) {
+  function setProfileCircle() {
+    let photo = localStorage.getItem('profilePhoto_' + loggedInUser);
+    const circle = document.getElementById('profileCircle');
+    if (photo) {
+      circle.innerHTML = `<img src="${photo}" alt="Profile" class="profile-img" />`;
+    } else {
+      let initials = loggedInUser.length === 1
+        ? loggedInUser[0].toUpperCase()
+        : (loggedInUser[0] + loggedInUser.slice(-1)).toUpperCase();
+      circle.textContent = initials;
+      circle.style.background = "#253a77";
+      circle.style.color = "#fff";
+    }
+  }
+  setProfileCircle();
+  document.getElementById('greetMsg').textContent = `Good day!`;
+}
+function logoutUser() { localStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; }
+
+// ========== MAIN TRANSPORT DYNAMIC FIELDS ==========
+function renderMainMode() {
+  const mainMode = document.getElementById("mainMode").value;
+  const fieldDiv = document.getElementById("mainModeFields");
+  fieldDiv.innerHTML = "";
+  if (mainMode === "edsa") {
+    let html = `
+      <label for="edsaStart">EDSA Bus Carousel - Starting Station</label>
+      <select id="edsaStart" required>
+        ${Object.keys(edsaFares).map(st => `<option value="${st}">${st}</option>`).join("")}
+      </select>
+      <label for="edsaEnd">EDSA Bus Carousel - Destination Station</label>
+      <select id="edsaEnd" required>
+        ${Object.keys(edsaFares).map(st => `<option value="${st}">${st}</option>`).join("")}
+      </select>
+    `;
+    fieldDiv.innerHTML = html;
+  } else if (mainMode === "lrtmrt") {
+    let html = `
+      <label>LRT/MRT Route</label>
+      <div class="transfer-row">
+        <select id="rail1Line" onchange="updateRail1Stations()">
+          <option value="">Select 1st Line</option>
+          <option value="lrt1">LRT 1</option>
+          <option value="lrt2">LRT 2</option>
+          <option value="mrt">MRT</option>
+        </select>
+        <select id="rail1Start"><option value="">Select Start Station</option></select>
+        <select id="rail1End"><option value="">Select End Station</option></select>
+      </div>
+      <label for="addTransfer">Add Transfer?</label>
+      <select id="addTransfer" onchange="renderTransferFields()">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+      <div id="transferFields"></div>
+    `;
+    fieldDiv.innerHTML = html;
+    updateRail1Stations();
+  } else if (mainMode === "mctaxi") {
+    fieldDiv.innerHTML = `
+      <label for="mcDistance">MC Taxi Distance (km)</label>
+      <input type="number" id="mcDistance" min="1" placeholder="Enter distance in kilometers" required>
+    `;
+  }
+}
+function updateRail1Stations() {
+  let line = document.getElementById("rail1Line").value;
+  let startSel = document.getElementById("rail1Start");
+  let endSel = document.getElementById("rail1End");
+  let stations = [];
+  if (line === "lrt1") stations = lrt1Stations;
+  if (line === "lrt2") stations = lrt2Stations;
+  if (line === "mrt") stations = mrtStations;
+  let opts = `<option value="">Select Start Station</option>`;
+  stations.forEach((st, idx) => opts += `<option value="${idx}">${st}</option>`);
+  startSel.innerHTML = opts.replace("Start", "Start");
+  endSel.innerHTML = opts.replace("Start", "End");
+}
+function renderTransferFields() {
+  let tfDiv = document.getElementById("transferFields");
+  if (document.getElementById("addTransfer").value !== "yes") { tfDiv.innerHTML = ""; return; }
+  tfDiv.innerHTML = `
+    <div class="transfer-row">
+      <select id="rail2Line" onchange="updateRail2Stations()">
+        <option value="">Select 2nd Line</option>
+        <option value="lrt1">LRT 1</option>
+        <option value="lrt2">LRT 2</option>
+        <option value="mrt">MRT</option>
+      </select>
+      <select id="rail2Start"><option value="">Select Transfer Station</option></select>
+      <select id="rail2End"><option value="">Select End Station</option></select>
+    </div>
+  `;
+}
+function updateRail2Stations() {
+  let line = document.getElementById("rail2Line").value;
+  let startSel = document.getElementById("rail2Start");
+  let endSel = document.getElementById("rail2End");
+  let stations = [];
+  if (line === "lrt1") stations = lrt1Stations;
+  if (line === "lrt2") stations = lrt2Stations;
+  if (line === "mrt") stations = mrtStations;
+  let opts = `<option value="">Select Station</option>`;
+  stations.forEach((st, idx) => opts += `<option value="${idx}">${st}</option>`);
+  startSel.innerHTML = opts.replace("Station", "Transfer Station");
+  endSel.innerHTML = opts.replace("Station", "End Station");
+}
+
+// ========== SHOW RESULTS AND SAVE ==========
+function showResults() {
+
+  const shift = document.getElementById("shift").value;
+  const mainMode = document.getElementById("mainMode").value;
+
+  // Clear existing warning if present
+  const prevWarning = document.getElementById("shiftWarning");
+  if (prevWarning) prevWarning.remove();
+
+  if (
+    shift === "shift5" &&
+    (mainMode === "MRT" || mainMode === "LRT" || mainMode === "LRT/MRT Combo")
+  ) {
+    const warning = document.createElement("div");
+    warning.id = "shiftWarning";
+    warning.style = "background:#ffe6e6;color:#cc0000;padding:10px;border-radius:4px;margin-bottom:10px;font-size:0.9rem";
+    warning.textContent = "⚠️ Warning: LRT/MRT may not be available during your 11:00 PM shift. Please consider alternate transport.";
+    document.querySelector(".container").prepend(warning);
+  }
+
+  let results = document.getElementById("planResults");
+  let content = document.getElementById("resultsContent");
+  let saveBtn = document.getElementById("saveTripBtn");
+  let savedMsg = document.getElementById("tripSavedMsg");
+  savedMsg.style.display = "none";
+  let mainMode = document.getElementById("mainMode").value;
+  if (!mainMode) { results.style.display = "none"; saveBtn.style.display = "none"; return; }
+    // Apply ETA adjustment based on shift
+  let shift = document.getElementById("shift").value;
+  let etaMultiplier = (shift === "shift4" || shift === "shift5") ? 1.2 : 1.0;
+
+  // Clear any previous warning
+  const warningBox = document.getElementById("shiftWarning");
+  if (warningBox) warningBox.remove();
+
+  // Check for LRT/MRT + night shift conflict
+  // using existing mainMode declared above
+  if ((shift === "shift4" || shift === "shift5") &&
+      (mainMode.includes("LRT") || mainMode.includes("MRT"))) {
+    const warning = document.createElement("div");
+    warning.id = "shiftWarning";
+    warning.style = "background:#ffe6e6;color:#cc0000;padding:10px;border-radius:4px;margin-bottom:10px;font-size:0.9rem";
+    warning.textContent = "⚠️ Warning: LRT/MRT may not be available during your selected shift. Please consider alternate routes.";
+    document.querySelector(".container").prepend(warning);
+  }
+
+// First mile
+  let firstVehicle = document.getElementById("firstVehicle").value;
+  let firstFare = Number(document.getElementById("firstFare").value) || 0;
+  let firstTime = Number(document.getElementById("firstTime").value) || 0;
+  firstTime = Math.round(firstTime * etaMultiplier);
+  // Last mile
+  let lastVehicle = document.getElementById("lastVehicle").value;
+  let lastFare = Number(document.getElementById("lastFare").value) || 0;
+  let lastTime = Number(document.getElementById("lastTime").value) || 0;
+  lastTime = Math.round(lastTime * etaMultiplier);
+  // Trip Note
+  let tripNote = document.getElementById("tripNote") ? document.getElementById("tripNote").value.trim() : "";
+  // Main transport segment
+
+  
+  let mainSummary = "", mainFare = 0, mainTime = 0, details = {};
+  mainTime = Math.round(mainTime * etaMultiplier);
+  let routeDesc = "";
+
+  // --- EDSA Bus Carousel: MANUAL TABLE ---
+  if (mainMode === "edsa") {
+    let startStation = document.getElementById("edsaStart").value;
+    let endStation = document.getElementById("edsaEnd").value;
+    routeDesc = `${startStation} → ${endStation}`;
+    if (!edsaFares[startStation] || !edsaFares[startStation][endStation]) {
+      content.innerHTML = `<span style="color:#b00;">Fare not found for selected stations. Please check your selection.</span>`;
+      results.style.display = "block"; saveBtn.style.display = "none"; return;
+    }
+    mainFare = edsaFares[startStation][endStation];
+    mainTime = Math.abs(Object.keys(edsaFares).indexOf(endStation) - Object.keys(edsaFares).indexOf(startStation)) * 5 + 10;
+  mainTime = Math.round(mainTime * etaMultiplier);
+    mainSummary = `<div class="summary-row"><span class="segment-label">Main:</span> EDSA Bus Carousel — ₱${mainFare} (${mainTime} min)</div>`;
+    details = { main: { mode: "EDSA Bus Carousel", start: startStation, end: endStation, fare: mainFare, time: mainTime } };
+  }
+  // --- LRT/MRT Combo ---
+  else if (mainMode === "lrtmrt") {
+    let rail1Line = document.getElementById("rail1Line").value;
+    let rail1Start = document.getElementById("rail1Start").value;
+    let rail1End = document.getElementById("rail1End").value;
+    let segmentFares = [];
+    let segmentTimes = [];
+    let segSummaries = [];
+    routeDesc = "";
+    if (!rail1Line || rail1Start === "" || rail1End === "") {
+      content.innerHTML = `<span style="color:#b00;">Please complete all LRT/MRT segment selections.</span>`;
+      results.style.display = "block"; saveBtn.style.display = "none"; return;
+    }
+    let lines = { "lrt1": "LRT 1", "lrt2": "LRT 2", "mrt": "MRT" };
+    let seg1Fare = getRailFare(rail1Line, +rail1Start, +rail1End);
+    let seg1Time = Math.abs(rail1End - rail1Start) * 4 + 8;
+    segSummaries.push(`<div class="summary-row"><span class="segment-label">Main:</span> ${lines[rail1Line]} — ₱${seg1Fare} (${seg1Time} min)</div>`);
+    segmentFares.push(seg1Fare);
+    segmentTimes.push(seg1Time);
+    let detailsCombo = [{ mode: lines[rail1Line], start: +rail1Start, end: +rail1End, fare: seg1Fare, time: seg1Time }];
+    let addTransfer = document.getElementById("addTransfer") ? document.getElementById("addTransfer").value : "no";
+    if (addTransfer === "yes") {
+      let rail2Line = document.getElementById("rail2Line").value;
+      let rail2Start = document.getElementById("rail2Start").value;
+      let rail2End = document.getElementById("rail2End").value;
+      if (!rail2Line || rail2Start === "" || rail2End === "") {
+        content.innerHTML = `<span style="color:#b00;">Please complete all transfer segment selections.</span>`;
+        results.style.display = "block"; saveBtn.style.display = "none"; return;
+      }
+      let seg2Fare = getRailFare(rail2Line, +rail2Start, +rail2End);
+      let seg2Time = Math.abs(rail2End - rail2Start) * 4 + 7;
+      segSummaries.push(`<div class="summary-row"><span class="segment-label">Transfer:</span> ${lines[rail2Line]} — ₱${seg2Fare} (${seg2Time} min)</div>`);
+      segmentFares.push(seg2Fare);
+      segmentTimes.push(seg2Time);
+      detailsCombo.push({ mode: lines[rail2Line], start: +rail2Start, end: +rail2End, fare: seg2Fare, time: seg2Time });
+    }
+    mainFare = segmentFares.reduce((a,b)=>a+b,0);
+    mainTime = segmentTimes.reduce((a,b)=>a+b,0);
+  mainTime = Math.round(mainTime * etaMultiplier);
+    mainSummary = segSummaries.join("");
+    details = { main: detailsCombo };
+  }
+  // --- MC Taxi ---
+  else if (mainMode === "mctaxi") {
+    let dist = Number(document.getElementById("mcDistance").value) || 0;
+    if (!dist) {
+      content.innerHTML = `<span style="color:#b00;">Please enter distance in km for MC Taxi.</span>`;
+      results.style.display = "block"; saveBtn.style.display = "none"; return;
+    }
+    let fareAngkas = getMcTaxiFare("Angkas", dist);
+    let fareMoveIt = getMcTaxiFare("Move It", dist);
+    let fareJoyRide = getMcTaxiFare("JoyRide", dist);
+    let best = Math.min(fareAngkas, fareMoveIt, fareJoyRide);
+    mainFare = best;
+    mainTime = Math.round(dist * 3 + 10);
+  mainTime = Math.round(mainTime * etaMultiplier);
+    mainSummary = `
+      <table class="taxi-table">
+        <tr><th>Provider</th><th>Fare (₱)</th></tr>
+        <tr><td>Angkas</td><td>${fareAngkas}</td></tr>
+        <tr><td>Move It</td><td>${fareMoveIt}</td></tr>
+        <tr><td>JoyRide</td><td>${fareJoyRide}</td></tr>
+      </table>
+      <div><b>Lowest:</b> ₱${best} (${mainTime} min for ${dist} km)</div>
+    `;
+    details = { main: { mode: "MC Taxi", distance: dist, fareAngkas, fareMoveIt, fareJoyRide, best, time: mainTime } };
+    routeDesc = `MC Taxi (${dist} km)`;
+  }
+
+  let totalFare = firstFare + mainFare + lastFare;
+  let totalTime = firstTime + mainTime + lastTime;
+  let segments = [];
+  if (firstVehicle && firstFare) {
+    segments.push(`<div class="summary-row"><span class="segment-label">First Mile:</span> ${firstVehicle} — ₱${firstFare} (${firstTime || "?"} min)</div>`);
+  }
+  segments.push(mainSummary);
+  if (lastVehicle && lastFare) {
+    segments.push(`<div class="summary-row"><span class="segment-label">Last Mile:</span> ${lastVehicle} — ₱${lastFare} (${lastTime || "?"} min)</div>`);
+  }
+
+  let summary = segments.join('');
+  content.innerHTML = `
+    <b>Route:</b> <span style="color:#2644a7">${routeDesc} → Ayala</span><br>
+    ${summary}
+    <div class="total-fare">Total Fare: ₱${totalFare}</div>
+    <div class="total-time">Total Estimated Travel Time: ${totalTime} min</div>
+    ${tripNote ? `<div style="color:#4670e8;font-style:italic;margin-top:7px;"><b>Note:</b> ${tripNote}</div>` : ''}
+  `;
+  results.style.display = "block"; saveBtn.style.display = "inline-block";
+  // Save handler
+  saveBtn.onclick = function() {
+    let trip = {
+      destination: "Ayala",
+      fare: totalFare,
+      date: new Date().toISOString(),
+      details: {
+        first: firstVehicle ? { vehicle: firstVehicle, fare: firstFare, time: firstTime } : null,
+        main: details.main,
+        last: lastVehicle ? { vehicle: lastVehicle, fare: lastFare, time: lastTime } : null
+      },
+      note: tripNote
+    };
+    let user = localStorage.getItem('loggedInUser');
+    let allTrips = JSON.parse(localStorage.getItem('trips_' + user) || "[]");
+    allTrips.push(trip);
+    localStorage.setItem('trips_' + user, JSON.stringify(allTrips));
+    savedMsg.style.display = "block"; saveBtn.style.display = "none";
+    setTimeout(() => { savedMsg.style.display = "none"; }, 1400);
+  };
+}
+
+// ===== FEEDBACK MODAL LOGIC =====
+function openFeedback() {
+  document.getElementById('feedbackModal').style.display = 'flex';
+}
+function closeFeedback() {
+  document.getElementById('feedbackModal').style.display = 'none';
+}
+function submitFeedback(e) {
+  e.preventDefault();
+  alert("Thank you for your feedback!");
+  closeFeedback();
+}
+</script>
+</body>
+</html>

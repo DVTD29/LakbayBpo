@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feedback - Transport Fare System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    .navbar {
+      background-color: #007bff;
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    .navbar-left,
+    .navbar-center,
+    .navbar-right {
+      display: flex;
+      align-items: center;
+    }
+    .navbar-left a,
+    .navbar-right a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .navbar-left a:hover,
+    .navbar-right a:hover {
+      text-decoration: underline;
+    }
+    .navbar-center {
+      flex: 1;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .logout-btn {
+      background-color: #ff4d4f;
+      color: #fff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .logout-btn:hover {
+      background-color: #d9363e;
+    }
+
+    .container {
+      padding: 100px 20px 30px;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #007bff;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body onload="checkLogin()">
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-left">
+      <a href="dashboard.html">Home</a>
+    </div>
+    <div class="navbar-center">
+      🚍 Transport Fare System
+    </div>
+    <div class="navbar-right">
+      <a href="feedback.html">Feedback</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Feedback</h1>
+    <form onsubmit="submitFeedback(); return false;">
+      <textarea placeholder="Write your feedback here..." required></textarea>
+      <button type="submit">Submit Feedback</button>
+    </form>
+  </div>
+
+  <script>
+    function checkLogin() {
+      const loggedInUser = sessionStorage.getItem("loggedInUser");
+      if (!loggedInUser) {
+        alert("⚠️ You must log in first.");
+        window.location.href = "login.html";
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
+
+    function submitFeedback() {
+      alert("✅ Thank you for your feedback!");
+      document.querySelector("textarea").value = "";
+    }
+  </script>
+</body>
+</html>
