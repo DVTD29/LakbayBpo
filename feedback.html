@@ -127,13 +127,13 @@
       const loggedInUser = sessionStorage.getItem("loggedInUser");
       if (!loggedInUser) {
         alert("⚠️ You must log in first.");
-        window.location.href = "login.html";
+        window.location.href = "index.html";
       }
     }
 
     function logout() {
       sessionStorage.removeItem("loggedInUser");
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
 
     function submitFeedback() {

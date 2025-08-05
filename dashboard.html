@@ -310,7 +310,7 @@
   <script>
     const loggedInUser = localStorage.getItem('loggedInUser');
     if (!loggedInUser) {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
   </script>
   <div class="outer-container">
@@ -411,7 +411,7 @@
     }
     function logoutUser() {
       localStorage.removeItem('loggedInUser');
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
     }
 
     // Analytics and Trips Table

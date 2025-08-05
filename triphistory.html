@@ -188,7 +188,7 @@
 <body>
 <script>
   const loggedInUser = localStorage.getItem('loggedInUser');
-  if (!loggedInUser) { window.location.href = "login.html"; }
+  if (!loggedInUser) { window.location.href = "index.html"; }
 </script>
 <div class="outer-container">
   <!-- Sidebar -->
@@ -276,7 +276,7 @@
     setProfileCircle();
     document.getElementById('greetMsg').textContent = `Good day!`;
   }
-  function logoutUser() { localStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; }
+  function logoutUser() { localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; }
 
   // Render Trip History
   function showTripHistory() {
